@@ -1,5 +1,6 @@
 from Bio import SeqIO
 import matplotlib.pyplot as plt
+import diffxpy.api as de
 import numpy as np
 
 fastq_file = "data/SRR1552444.fastq" 
@@ -42,3 +43,6 @@ plt.show()
 print(f"Total reads processed: {count}")
 print(f"Average read length: {np.mean(read_lengths):.2f}")
 print(f"Average quality score: {np.mean(quality_scores):.2f}")
+import diffxpy.api as de
+
+print("hello")
