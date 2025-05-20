@@ -74,7 +74,7 @@ try:
     # Calculate means for each gene
     means = (sample1_counts + sample2_counts) / 2
     
-    # Calculate fold changes and log2 fold changes
+    # calculate fold changes and log2 fold changes
     fold_changes = (sample2_counts + 0.1) / (sample1_counts + 0.1)  # Add small value to avoid division by zero
     log2_fold_changes = np.log2(fold_changes)
     
