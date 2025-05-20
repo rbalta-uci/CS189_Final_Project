@@ -25,14 +25,6 @@ for record in SeqIO.parse(fastq_file, "fastq"):
     count += 1
 
 plt.figure(figsize=(10, 6))
-plt.hist(read_lengths, bins=50)
-plt.xlabel('Read Length')
-plt.ylabel('Count')
-plt.title('Read Length Distribution')
-plt.savefig('read_length_distribution.png')
-plt.show()
-
-plt.figure(figsize=(10, 6))
 plt.hist(quality_scores, bins=50)
 plt.xlabel('Average Quality Score')
 plt.ylabel('Count')
@@ -43,6 +35,3 @@ plt.show()
 print(f"Total reads processed: {count}")
 print(f"Average read length: {np.mean(read_lengths):.2f}")
 print(f"Average quality score: {np.mean(quality_scores):.2f}")
-import diffxpy.api as de
-
-print("hello")
