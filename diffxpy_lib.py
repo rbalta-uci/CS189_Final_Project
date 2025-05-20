@@ -1,16 +1,11 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import scipy.stats as stats
 import anndata as ad
-import os
-import seaborn as sns
-
 
 try:
     # load count matrices
-    sample1_file = 'simple_count_output/sample1_gene_counts.csv'
-    sample2_file = 'simple_count_output/sample2_gene_counts.csv'
+    sample1_file = 'count_output/sample1_gene_counts.csv'
+    sample2_file = 'count_output/sample2_gene_counts.csv'
     
     # load the data
     sample1_df = pd.read_csv(sample1_file)
@@ -23,9 +18,9 @@ try:
     sample2_genes = sample2_df['gene_id'].values
     sample2_counts = sample2_df['count'].values
     
-    # find common genes (kmers)
+    # find common kmers
     common_genes = set(sample1_genes).intersection(set(sample2_genes))
-    print(f"Number of common genes/kmers: {len(common_genes)}")
+    print(f"number of common kmers: {len(common_genes)}")
     
     # create a new dataframe with common genes
     merged_data = []
@@ -51,7 +46,7 @@ try:
     # create and save merged dataframe
     merged_df = pd.DataFrame(merged_data)
     merged_df.set_index('gene_id', inplace=True)
-    merged_df.to_csv('simple_count_output/merged_samples.csv')
+    merged_df.to_csv('count_output/merged_count_matrix.csv')
     
     # convert to np.array for AnnData
     X = merged_df.T.values 
@@ -75,7 +70,7 @@ try:
     means = (sample1_counts + sample2_counts) / 2
     
     # calculate fold changes and log2 fold changes
-    fold_changes = (sample2_counts + 0.1) / (sample1_counts + 0.1)  # Add small value to avoid division by zero
+    fold_changes = (sample2_counts + 0.1) / (sample1_counts + 0.1)  
     log2_fold_changes = np.log2(fold_changes)
     
     p_values = []
@@ -99,7 +94,7 @@ try:
         'pval': p_values
     })
     
-    # Sort by p-value
+    # sort by p-value
     results = results.sort_values('pval')
     
     print("\nTop 20 differentially expressed kmers:")
@@ -113,13 +108,8 @@ try:
     print(f"\nNumber of significant kmers (p < 0.05): {len(sig_005)}")
     print(f"Number of significant kmers (p < 0.01): {len(sig_001)}")
     
-    # Save results to CSV
+    # save results to csv
     results.to_csv('de_results.csv')
-    
 
 except FileNotFoundError as e:
-    print(f"Error: File not found - {e}")
-except Exception as e:
-    print(f"Error: {e}")
-    import traceback
-    traceback.print_exc()
+    print(f"file not found {e}")

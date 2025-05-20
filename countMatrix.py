@@ -66,22 +66,3 @@ for sample_info in FASTQ_FILES:
     df = fastq_to_counts(fastq, sample)
     if df is not None:
         all_samples_data[sample] = df
-        merged_kmers.update(df['gene_id'])
-
-# create merged dataframe with the k-mer list
-merged_df = pd.DataFrame(index=list(merged_kmers))
-
-# sample count as a column
-for sample, df in all_samples_data.items():
-    # Create a series with the sample's counts
-    sample_counts = pd.Series(df['count'].values, index=df['gene_id'])
-    
-    # Add this as a column to the merged dataframe, filling missing values with 0
-    merged_df[sample] = sample_counts
-    
-# deal with nan values
-merged_df = merged_df.fillna(0)
-
-# save the merged matrix
-merged_output = os.path.join(OUTPUT_DIR, "merged_count_matrix.csv")
-merged_df.to_csv(merged_output)
