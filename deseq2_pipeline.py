@@ -7,9 +7,7 @@
 
 import os
 import pickle as pkl
-
 import pandas as pd
-
 from pydeseq2.dds import DeseqDataSet
 from pydeseq2.default_inference import DefaultInference
 from pydeseq2.ds import DeseqStats
@@ -51,7 +49,7 @@ print(dds)
 
 with open(os.path.join(OUTPUT_PATH, "result_dds.pkl"), "wb") as f:
     pkl.dump(dds, f)
-    
+
 print(dds.varm["dispersions"])
 
 print(dds.varm["LFC"])
