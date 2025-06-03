@@ -1,10 +1,3 @@
-# Steps to conduct differential analysis
-
-# implement our libraries 
-
-# upload our data into our envirionnment
-# this includes our raw data and our metadata
-
 import os
 import pickle as pkl
 import pandas as pd
@@ -12,6 +5,10 @@ from pydeseq2.dds import DeseqDataSet
 from pydeseq2.default_inference import DefaultInference
 from pydeseq2.ds import DeseqStats
 import diffxpy.api as de
+import matplotlib.pylab as plt
+import numpy as np
+import seaborn as sns
+
 if __name__ == "__main__":
     # Replace this with the path to directory where you would like results to be saved
     OUTPUT_PATH = "../output_files/synthetic_example/"
@@ -33,17 +30,15 @@ if __name__ == "__main__":
     counts_df = counts_df.loc[samples_to_keep]
     metadata = metadata.loc[samples_to_keep]
 
-    genes_to_keep = counts_df.columns[counts_df.sum(axis=0) >= 10]
+    genes_to_keep = counts_df.columns[counts_df.sum(axis=0) >= 1]
     counts_df = counts_df[genes_to_keep]
 
 
     full_formula_loc = '~ 1 + condition'
-    reduced_formula_loc = '~ 1'
     sample_description=metadata
 
     print(type(metadata))
     print("Type of full_formula_loc:", type(full_formula_loc))
-    print("Type of reduced_formula_loc:", type(reduced_formula_loc))
     print(metadata.columns.tolist())
     test = de.test.wald(counts_df.values, 
                     formula_loc=full_formula_loc, 
@@ -52,3 +47,6 @@ if __name__ == "__main__":
                     gene_names= counts_df.columns.tolist())
 
     print(test.summary().head())
+    test = test.summary()
+    plt.scatter(x=test['log2fc'],y=test['pval'].apply(lambda x:-np.log10(x)),s=1)
+    plt.show()
