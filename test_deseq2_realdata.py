@@ -8,9 +8,7 @@ import diffxpy.api as de
 import matplotlib.pylab as plt
 import numpy as np
 import scanpy as sc
-if __name__ == "__main__":
-    # Replace this with the path to directory where you would like results to be saved
-    OUTPUT_PATH = "../output_files/synthetic_example/"
+def preprocessing():
     os.makedirs(OUTPUT_PATH, exist_ok=True)  # Create path if it doesn't exist
 
     ann_data = sc.datasets.ebi_expression_atlas("E-MTAB-9543")
@@ -27,7 +25,12 @@ if __name__ == "__main__":
     # Metadata
     metadata = ann_data.obs.copy()
     metadata["condition"] = metadata["cell_type"]  # Add 'condition' column
+    return counts_df, metadata
+if __name__ == "__main__":
+    # Replace this with the path to directory where you would like results to be saved
+    OUTPUT_PATH = "./output_files/synthetic_example/"
 
+    counts_df, metadata = preprocessing()
     # DESeq2 Setup
     inference = DefaultInference(n_cpus=8)
     dds = DeseqDataSet(
