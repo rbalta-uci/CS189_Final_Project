@@ -22,31 +22,64 @@ if __name__ == "__main__":
     ann_data = sc.datasets.ebi_expression_atlas("E-MTAB-9543")
     counts_df = ann_data.to_df()
     metadata =pd.read_csv('ExpDesign-E-MTAB-9543.tsv', sep='\t')
-      
-    print(ann_data.shape)
-    #print(metadata.columns)
-   # Filter metadata samples with non-NA cell type label
-    samples_to_keep = counts_df['Factor Value[inferred cell type - authors labels]'].notna()
-    filtered_sample_ids = counts_df.index[samples_to_keep]
+    
 
-    # Subset counts_df and metadata by matching sample IDs explicitly:
-    counts_df = counts_df.loc[filtered_sample_ids, :]  # rows=samples
-    metadata = counts_df.loc[filtered_sample_ids, :]
+    ann_data.obs["cell_type"] = ann_data.obs["Factor Value[inferred cell type - authors labels]"].astype("category")
+    
+    mask = ~ann_data.obs["cell_type"].isna() #get rid of nan columns
+    ann_data = ann_data[mask].copy()
 
-    # Filter genes with at least one count across filtered samples
-    genes_to_keep = counts_df.columns[counts_df.sum(axis=0) >= 1]
-    counts_df = counts_df[genes_to_keep]
+    
+    ann_data.X = ann_data.X.toarray() #make dense
 
-    # Check shapes again
-    print("Counts shape:", counts_df.shape)    # (samples, genes)
-    print("Metadata shape:", metadata.shape)   # (samples, metadata columns)
+    ann_data = ann_data[:1000, :]     # First 1000 cells
 
-    full_formula_loc = "~ 1 + 'Factor Value[inferred cell type - authors labels]'"
-    test = de.test.wald(counts_df.values, 
-                    formula_loc=full_formula_loc, 
-                    sample_description=metadata,
-                    factor_loc_totest = "Factor Value[inferred cell type - authors labels]",
-                    gene_names= counts_df.columns.tolist())
+    min_cells_per_type = 10
+    valid_cell_types = ann_data.obs["cell_type"].value_counts()
+    valid_cell_types = valid_cell_types[valid_cell_types >= min_cells_per_type].index
+
+    mask = ann_data.obs["cell_type"].isin(valid_cell_types)
+    ann_data = ann_data[mask].copy()
+
+
+    ann_data.obs["cell_type"] = ann_data.obs["cell_type"].cat.remove_unused_categories()
+
+    sc.pp.filter_genes(ann_data, min_cells=5)
+
+    print("Filtered shape:", ann_data.shape)
+    print("Genes with all zeros:", (ann_data.X.sum(axis=0) == 0).sum())
+
+    full_formula_loc = "~ 1 + cell_type"
+
+    import warnings
+    warnings.filterwarnings("ignore", category=RuntimeWarning)
+
+    ann_data.X = np.nan_to_num(ann_data.X, nan=0.0, posinf=0.0, neginf=0.0)
+
+    nonzero_genes = (ann_data.X.sum(axis=0) > 0).A1 if hasattr(ann_data.X, "A1") else (ann_data.X.sum(axis=0) > 0)
+    ann_data = ann_data[:, nonzero_genes]
+    ann_data.X = np.asarray(ann_data.X, dtype=np.float32)
+    
+    # Convert to DataFrame for easier group-wise variance calculation
+    X_df = pd.DataFrame(ann_data.X, columns=ann_data.var_names)
+    X_df["cell_type"] = ann_data.obs["cell_type"].values
+
+    # Compute variance per gene within each group
+    group_variance = X_df.groupby("cell_type").var()
+
+    # Identify genes with nonzero variance across all groups
+    nonzero_var_genes = group_variance.columns[(group_variance > 1e-6).all(axis=0)]
+
+    # Filter ann_data to include only those genes
+    ann_data = ann_data[:, nonzero_var_genes]
+
+    test = de.test.wald(
+        data=ann_data,
+        formula_loc="~ 1 + cell_type",
+        factor_loc_totest="cell_type",
+        sample_description=ann_data.obs,
+        gene_names=ann_data.var_names.tolist()
+    )
 
     print(test.summary())
     test = test.summary()
