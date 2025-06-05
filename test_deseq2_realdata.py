@@ -14,7 +14,7 @@ if __name__ == "__main__":
     OUTPUT_PATH = "./output_files/synthetic_example/"
     os.makedirs(OUTPUT_PATH, exist_ok=True)  # Create path if it doesn't exist
 
-    counts_df, metadata = preprocessing()
+    counts_df, metadata, anndata = preprocessing()
     # DESeq2 Setup
     inference = DefaultInference(n_cpus=8)
     dds = DeseqDataSet(
