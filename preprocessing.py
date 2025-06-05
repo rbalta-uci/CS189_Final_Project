@@ -9,19 +9,19 @@ def preprocessing():
     # Drop NA cell types
     ann_data = ann_data[~ann_data.obs["cell_type"].isna()].copy()
     sc.pp.filter_genes(ann_data, min_cells=10)
-    sc.pp.filter_cells(ann_data, min_counts=1000)  # optional
+    sc.pp.filter_cells(ann_data, min_counts=1000)
     # Convert to DataFrame
     counts_df = pd.DataFrame.sparse.from_spmatrix( ann_data.X.astype(np.float32), index=ann_data.obs_names, columns=ann_data.var_names)
     counts_df = counts_df.astype(np.int32)
     # Metadata
     metadata = ann_data.obs.copy()
-    metadata["condition"] = metadata["cell_type"]  # Add 'condition' column
-    return counts_df, metadata
+    metadata["condition"] = metadata["cell_type"]  
+    return counts_df, metadata, ann_data
 
 def relevant_genes(file, output):
     with open(file, 'r') as f:
-        f.readline()
         with open(output, 'w') as r:
+            r.write(f.readline())
             for line in f:
                 line_split = line.split(',')
                 
