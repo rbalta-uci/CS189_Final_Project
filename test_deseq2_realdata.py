@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
     # Contrast setup (automatically pick top 2 conditions)
     conditions = metadata["condition"].value_counts().index[:2].tolist()
-    print("Using contrast between:", conditions)
+    print(conditions)
 
     ds = DeseqStats(dds, contrast=["condition", conditions[0], conditions[1]], inference=inference)
     ds.summary()
