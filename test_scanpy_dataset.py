@@ -74,7 +74,6 @@ scanpy_results = scanpy_results[['gene', 'log2FoldChange', 'stat', 'pvalue', 'pa
 scanpy_results.set_index('gene', inplace=True)
 
 output_path = "./output_files/"
-import os
 os.makedirs(output_path, exist_ok=True)
 scanpy_results.to_csv(os.path.join(output_path, "scanpy_results.csv"))
 

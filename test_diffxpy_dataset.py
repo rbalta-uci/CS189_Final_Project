@@ -1,3 +1,5 @@
+import os
+import pickle as pkl
 import pandas as pd
 from pydeseq2.dds import DeseqDataSet
 from pydeseq2.default_inference import DefaultInference
@@ -5,6 +7,7 @@ from pydeseq2.ds import DeseqStats
 import diffxpy.api as de
 import matplotlib.pylab as plt
 import numpy as np
+import scanpy as sc
 from preprocessing import preprocessing
 
 def run_diffxpy():

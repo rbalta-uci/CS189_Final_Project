@@ -8,7 +8,8 @@ if __name__ == "__main__":
     OUTPUT_PATH = "./output_files/"
     os.makedirs(OUTPUT_PATH, exist_ok=True) 
 
-    counts_df, metadata = preprocessing()
+    counts_df, metadata, anndata = preprocessing()
+    # DESeq2 Setup
     inference = DefaultInference(n_cpus=8)
     dds = DeseqDataSet(
         counts=counts_df,
@@ -20,7 +21,7 @@ if __name__ == "__main__":
     dds.deseq2()
 
     conditions = metadata["condition"].value_counts().index[:2].tolist()
-    print("Using contrast between:", conditions)
+    print(conditions)
 
     ds = DeseqStats(dds, contrast=["condition", conditions[0], conditions[1]], inference=inference)
     ds.summary()
