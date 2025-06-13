@@ -3,34 +3,13 @@ import scanpy as sc
 import os
 from preprocessing import preprocessing
 
-counts_df, metadata = preprocessing()
-
-# get cell and gene names from data
-index_sample = str(counts_df.index[0]) if len(counts_df.index) > 0 else ""
-columns_sample = str(counts_df.columns[0]) if len(counts_df.columns) > 0 else ""
-
-if "ENSG" in index_sample or ("-" in index_sample and len(index_sample) > 15):
-    count_matrix = counts_df
-    cell_names = counts_df.index
-    gene_names = counts_df.columns
-elif "ENSG" in columns_sample or ("-" in columns_sample and len(columns_sample) > 15):
-    count_matrix = counts_df.T
-    cell_names = counts_df.columns
-    gene_names = counts_df.index
-else:
-    if counts_df.shape[0] < counts_df.shape[1]:
-        count_matrix = counts_df.T
-        cell_names = counts_df.columns
-        gene_names = counts_df.index
-    else:
-        count_matrix = counts_df
-        cell_names = counts_df.index
-        gene_names = counts_df.columns
+# get preprocessed data
+counts_df, metadata, ann_data = preprocessing()
 
 # create AnnData object
-adata = sc.AnnData(X=count_matrix.values)
-adata.obs_names = cell_names
-adata.var_names = gene_names
+adata = sc.AnnData(X=counts_df.values)
+adata.obs_names = counts_df.index    
+adata.var_names = counts_df.columns  
 adata.obs = metadata.copy()
 adata.raw = adata.copy()
 
